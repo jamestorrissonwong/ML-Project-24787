@@ -1,0 +1,39 @@
+function [emg_signal_filt] = FilterEmg2(emg_signal,fs)
+% emg filtering
+Wp_high = 35/(fs/2);  
+Ws_high = 400/(fs/2) ;
+%Butterworth 7th order
+%Highpass 35 Hz 
+[b_high,a_high] = butter(7,Wp_high,'high'); 
+%figure,freqz(b_high,a_high,[],fs);
+
+%Butterworth 7th order
+%Lowpass 400 Hz 
+[b_low,a_low] = butter(7,Ws_high,'low'); 
+%figure,freqz(b_low,a_low,[],fs);
+
+% Initialize Low Pass Filter (LPF) parameters (Passband frequency 2 Hz and Order 5):
+[b,a] = butter(5,2/(fs/2),'low');               
+%figure,freqz(b,a,[],fs);
+
+%HP filtering
+tmp_emg_signal = filtfilt(b_high,a_high,emg_signal); 
+%figure,plot(emg_signal),hold on, plot(tmp_emg_signal,'r');
+
+%LP filtering
+tmp_emg_signal = filtfilt(b_low,a_low,tmp_emg_signal); 
+%figure,plot(emg_signal),hold on, plot(tmp_emg_signal,'r');
+
+% Full-wave rectification
+s = sign(tmp_emg_signal)
+tmp_rect_emg_signal = s*(tmp_emg_signal); 
+% figure,plot(emg_signal),hold on, plot(tmp_rect_emg_signal,'r');
+ 
+% LPF Butterworth:
+emg_signal_filt = filtfilt(b_low,a_high,tmp_rect_emg_signal);
+%figure,plot(emg_signal),hold on, plot(emg_signal_filt,'r')
+figure,plot(emg_signal),title('Original');
+% figure,plot(tmp_emg_signal),title('Filtered');
+% emg_signal_filt = tmp_emg_signal
+figure, plot(emg_signal_filt,'r'),title('Filtered');
+end
